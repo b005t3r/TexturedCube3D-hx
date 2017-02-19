@@ -340,11 +340,11 @@ Main.prototype = {
 		this.engine.selectShader(this.compiledShader);
 		this.engine.uploadShaderBuffers(this.shaderBuffers,0);
 		this.indexBuffer = h3d_Indexes.alloc(this.indices);
-		this.vertexBuffer = h3d_Buffer.ofFloats(this.vertices,8,[h3d_BufferFlag.RawFormat],{ fileName : "Main.hx", lineNumber : 204, className : "Main", methodName : "onEngineReady"});
+		this.vertexBuffer = h3d_Buffer.ofFloats(this.vertices,8,[h3d_BufferFlag.RawFormat]);
 		var entry = this.fileSystem.get("haxe_logo.png");
 		entry.loadBitmap(function(bitmap) {
 			var tmp = hxd_fs__$LoadedBitmap_LoadedBitmap_$Impl_$.toBitmap(bitmap);
-			_gthis.haxeLogoTexture = h3d_mat_Texture.fromBitmap(tmp,{ fileName : "Main.hx", lineNumber : 209, className : "Main", methodName : "onEngineReady"});
+			_gthis.haxeLogoTexture = h3d_mat_Texture.fromBitmap(tmp);
 		});
 	}
 	,onNextFrame: function() {
@@ -1888,7 +1888,6 @@ var h3d_Buffer = function(vertices,stride,flags,allocPos) {
 	this.vertices = vertices;
 	var this1 = 0;
 	this.flags = this1;
-	this.allocPos = allocPos;
 	if(flags != null) {
 		var _g = 0;
 		while(_g < flags.length) {
@@ -1898,9 +1897,6 @@ var h3d_Buffer = function(vertices,stride,flags,allocPos) {
 		}
 	}
 	if((this.flags & 1 << h3d_BufferFlag.NoAlloc[1]) == 0) {
-		if(h3d_Engine.CURRENT == null) {
-			throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-		}
 		h3d_Engine.CURRENT.mem.allocBuffer(this,stride);
 	}
 };
@@ -2089,9 +2085,6 @@ h3d_Camera.prototype = {
 		return p;
 	}
 	,rayFromScreen: function(pixelX,pixelY) {
-		if(h3d_Engine.CURRENT == null) {
-			throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-		}
 		var engine = h3d_Engine.CURRENT;
 		var rx = (pixelX / engine.width - 0.5) * 2;
 		var ry = (0.5 - pixelY / engine.height) * 2;
@@ -2383,14 +2376,8 @@ var h3d_Engine = function(hardware,aa) {
 $hxClasses["h3d.Engine"] = h3d_Engine;
 h3d_Engine.__name__ = ["h3d","Engine"];
 h3d_Engine.check = function() {
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 };
 h3d_Engine.getCurrent = function() {
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	return h3d_Engine.CURRENT;
 };
 h3d_Engine.prototype = {
@@ -2661,7 +2648,7 @@ h3d_Engine.prototype = {
 	}
 	,pushTargets: function(textures) {
 		if(this.nullTexture == null) {
-			this.nullTexture = new h3d_mat_Texture(0,0,[h3d_mat_TextureFlags.NoAlloc],null,{ fileName : "Engine.hx", lineNumber : 298, className : "h3d.Engine", methodName : "pushTargets"});
+			this.nullTexture = new h3d_mat_Texture(0,0,[h3d_mat_TextureFlags.NoAlloc]);
 		}
 		this.pushTarget(this.nullTexture);
 		this.driver.setRenderTargets(textures);
@@ -2759,9 +2746,6 @@ h3d_IDrawable.prototype = {
 	__class__: h3d_IDrawable
 };
 var h3d_Indexes = function(count) {
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	this.mem = h3d_Engine.CURRENT.mem;
 	this.count = count;
 	this.mem.allocIndexes(this);
@@ -7408,9 +7392,6 @@ h3d_impl_Driver.prototype = {
 	,begin: function(frame) {
 	}
 	,log: function(str) {
-		if(this.logEnable) {
-			this.logImpl(str);
-		}
 	}
 	,getNativeShaderCode: function(shader) {
 		return null;
@@ -7545,7 +7526,7 @@ var h3d_impl_GlDriver = function() {
 	if(this.canvas == null) {
 		throw new js__$Boot_HaxeError("Canvas #webgl not found");
 	}
-	this.gl = js_html__$CanvasElement_CanvasUtil.getContextWebGL(this.canvas,{ alpha : false, antialias: false});
+	this.gl = js_html__$CanvasElement_CanvasUtil.getContextWebGL(this.canvas,{ alpha : false});
 	if(this.gl == null) {
 		throw new js__$Boot_HaxeError("Could not acquire GL context");
 	}
@@ -7750,7 +7731,7 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 				var t = buf.tex[i];
 				if(t == null || t.t == null && t.realloc == null) {
 					var color = h3d_mat_Defaults.loadingTextureColor;
-					t = h3d_mat_Texture.fromColor(color,(color >>> 24) / 255,{ fileName : "GlDriver.hx", lineNumber : 328, className : "h3d.impl.GlDriver", methodName : "uploadBuffer"});
+					t = h3d_mat_Texture.fromColor(color,(color >>> 24) / 255);
 				}
 				if(t != null && t.t == null && t.realloc != null) {
 					t.alloc();
@@ -8178,7 +8159,7 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 				switch(_g21) {
 				case "normal":
 					if(m.stride < 6) {
-						throw new js__$Boot_HaxeError("Buffer is missing NORMAL data, set it to RAW format ?" + Std.string(v.allocPos));
+						throw new js__$Boot_HaxeError("Buffer is missing NORMAL data, set it to RAW format ?");
 					}
 					pos1 = 3;
 					break;
@@ -8187,7 +8168,7 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 					break;
 				case "uv":
 					if(m.stride < 8) {
-						throw new js__$Boot_HaxeError("Buffer is missing UV data, set it to RAW format ?" + Std.string(v.allocPos));
+						throw new js__$Boot_HaxeError("Buffer is missing UV data, set it to RAW format ?");
 					}
 					pos1 = 6;
 					break;
@@ -8196,7 +8177,7 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 					pos1 = offset;
 					offset += a1.size;
 					if(offset > m.stride) {
-						throw new js__$Boot_HaxeError("Buffer is missing '" + s + "' data, set it to RAW format ?" + Std.string(v.allocPos));
+						throw new js__$Boot_HaxeError("Buffer is missing '" + s + "' data, set it to RAW format ?");
 					}
 				}
 				this.gl.vertexAttribPointer(a1.index,a1.size,a1.type,false,m.stride * 4,pos1 * 4);
@@ -8400,9 +8381,6 @@ var h3d_impl_ManagedBuffer = function(stride,size,flags) {
 	this.size = size;
 	this.stride = stride;
 	this.freeList = new h3d_impl__$ManagedBuffer_FreeCell(0,size,null);
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	this.mem = h3d_Engine.CURRENT.mem;
 	this.mem.allocManaged(this);
 };
@@ -8426,11 +8404,9 @@ h3d_impl_ManagedBuffer.prototype = {
 		if(p < 0) {
 			return null;
 		}
-		var b = new h3d_Buffer(vertices,this.stride,[h3d_BufferFlag.NoAlloc],{ fileName : "ManagedBuffer.hx", lineNumber : 56, className : "h3d.impl.ManagedBuffer", methodName : "alloc"});
+		var b = new h3d_Buffer(vertices,this.stride,[h3d_BufferFlag.NoAlloc]);
 		b.position = p;
 		b.buffer = this;
-		b.allocNext = this.allocHead;
-		this.allocHead = b;
 		return b;
 	}
 	,getFreeVertices: function() {
@@ -8475,8 +8451,6 @@ h3d_impl_ManagedBuffer.prototype = {
 		}
 		b.position = p;
 		b.buffer = this;
-		b.allocNext = this.allocHead;
-		this.allocHead = b;
 		return true;
 	}
 	,freeBuffer: function(b) {
@@ -8514,20 +8488,6 @@ h3d_impl_ManagedBuffer.prototype = {
 		}
 		if(nvert != 0) {
 			throw new js__$Boot_HaxeError("assert");
-		}
-		var cur = this.allocHead;
-		var prev1 = null;
-		while(cur != null) {
-			if(cur == b) {
-				if(prev1 == null) {
-					this.allocHead = b.allocNext;
-				} else {
-					prev1.allocNext = b.allocNext;
-				}
-				break;
-			}
-			prev1 = cur;
-			cur = cur.allocNext;
 		}
 		if(this.freeList.count == this.size && (this.flags & 1 << h3d_BufferFlag.Managed[1]) == 0) {
 			this.dispose();
@@ -8637,22 +8597,6 @@ h3d_impl_MemoryManager.prototype = {
 		m.vbuf = null;
 		this.usedMemory -= m.size * m.stride * 4;
 		this.bufferCount--;
-		if((m.flags & 1 << h3d_BufferFlag.Managed[1]) == 0) {
-			var c = this.buffers[0];
-			var prev = null;
-			while(c != null) {
-				if(c == m) {
-					if(prev == null) {
-						this.buffers[0] = m.next;
-					} else {
-						prev.next = m.next;
-					}
-					break;
-				}
-				prev = c;
-				c = c.next;
-			}
-		}
 	}
 	,allocBuffer: function(b,stride) {
 		var max = (b.flags & 1 << h3d_BufferFlag.Quads[1]) != 0 ? 65532 : (b.flags & 1 << h3d_BufferFlag.Triangles[1]) != 0 ? 65533 : 65534;
@@ -8675,13 +8619,11 @@ h3d_impl_MemoryManager.prototype = {
 					flags.push(f);
 				}
 			}
-			n.next = new h3d_Buffer(rem,stride,flags,{ fileName : "MemoryManager.hx", lineNumber : 146, className : "h3d.impl.MemoryManager", methodName : "allocBuffer"});
+			n.next = new h3d_Buffer(rem,stride,flags);
 			return;
 		}
 		if((b.flags & 1 << h3d_BufferFlag.Managed[1]) == 0) {
 			var m = new h3d_impl_ManagedBuffer(stride,b.vertices);
-			m.next = this.buffers[0];
-			this.buffers[0] = m;
 			if(!m.allocBuffer(b)) {
 				throw new js__$Boot_HaxeError("assert");
 			}
@@ -8717,7 +8659,7 @@ h3d_impl_MemoryManager.prototype = {
 								flags1.push(f1);
 							}
 						}
-						b.next = new h3d_Buffer(total - size,stride,flags1,{ fileName : "MemoryManager.hx", lineNumber : 185, className : "h3d.impl.MemoryManager", methodName : "allocBuffer"});
+						b.next = new h3d_Buffer(total - size,stride,flags1);
 						return;
 					}
 					m1 = m1.next;
@@ -8762,16 +8704,7 @@ h3d_impl_MemoryManager.prototype = {
 			if(t.realloc == null) {
 				continue;
 			}
-			var tmp;
-			if(!force) {
-				if(h3d_Engine.CURRENT == null) {
-					throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-				}
-				tmp = t.lastFrame < h3d_Engine.CURRENT.frameCount - 3600;
-			} else {
-				tmp = true;
-			}
-			if(tmp) {
+			if(force || t.lastFrame < h3d_Engine.CURRENT.frameCount - 3600) {
 				t.dispose();
 				return true;
 			}
@@ -8883,69 +8816,11 @@ h3d_impl_MemoryManager.prototype = {
 		return { bufferCount : this.bufferCount, freeManagedMemory : free, managedMemory : total, totalMemory : this.usedMemory + this.texMemory, textureCount : this.textures.length, textureMemory : this.texMemory};
 	}
 	,allocStats: function() {
-		var h = new haxe_ds_StringMap();
-		var all = [];
-		var _g = 0;
-		var _g1 = this.textures;
-		while(_g < _g1.length) {
-			var t = _g1[_g];
-			++_g;
-			var key = "$" + t.allocPos.fileName + ":" + t.allocPos.lineNumber;
-			var inf = __map_reserved[key] != null ? h.getReserved(key) : h.h[key];
-			if(inf == null) {
-				inf = { file : t.allocPos.fileName, line : t.allocPos.lineNumber, count : 0, size : 0, tex : true};
-				if(__map_reserved[key] != null) {
-					h.setReserved(key,inf);
-				} else {
-					h.h[key] = inf;
-				}
-				all.push(inf);
-			}
-			inf.count++;
-			inf.size += t.width * t.height * this.bpp(t);
-		}
-		var _g2 = 0;
-		var _g11 = this.buffers;
-		while(_g2 < _g11.length) {
-			var buf = _g11[_g2];
-			++_g2;
-			var buf1 = buf;
-			while(buf1 != null) {
-				var b = buf1.allocHead;
-				while(b != null) {
-					var key1 = b.allocPos.fileName + ":" + b.allocPos.lineNumber;
-					var inf1 = __map_reserved[key1] != null ? h.getReserved(key1) : h.h[key1];
-					if(inf1 == null) {
-						inf1 = { file : b.allocPos.fileName, line : b.allocPos.lineNumber, count : 0, size : 0, tex : false};
-						if(__map_reserved[key1] != null) {
-							h.setReserved(key1,inf1);
-						} else {
-							h.h[key1] = inf1;
-						}
-						all.push(inf1);
-					}
-					inf1.count++;
-					inf1.size += b.vertices * b.buffer.stride * 4;
-					b = b.allocNext;
-				}
-				buf1 = buf1.next;
-			}
-		}
-		all.sort(function(a,b1) {
-			if(a.size == b1.size) {
-				return a.line - b1.line;
-			} else {
-				return b1.size - a.size;
-			}
-		});
-		return all;
+		return [];
 	}
 	,__class__: h3d_impl_MemoryManager
 };
 var h3d_impl_RenderContext = function() {
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	this.engine = h3d_Engine.CURRENT;
 	this.frame = 0;
 	this.time = 0.;
@@ -8959,9 +8834,6 @@ h3d_impl_RenderContext.prototype = {
 var h3d_impl_TextureCache = function() {
 	this.position = 0;
 	this.cache = [];
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	var engine = h3d_Engine.CURRENT;
 	this.defaultFormat = h3d_mat_Texture.nativeFormat;
 	this.defaultDepthBuffer = h3d_mat_DepthBuffer.getDefault();
@@ -9004,7 +8876,7 @@ h3d_impl_TextureCache.prototype = {
 				t.dispose();
 			}
 			var flags = [h3d_mat_TextureFlags.Target];
-			t = new h3d_mat_Texture(width,height,flags,format,{ fileName : "TextureCache.hx", lineNumber : 45, className : "h3d.impl.TextureCache", methodName : "allocTarget"});
+			t = new h3d_mat_Texture(width,height,flags,format);
 			this.cache[this.position] = t;
 		}
 		t.depthBuffer = defaultDepth ? this.defaultDepthBuffer : null;
@@ -9349,26 +9221,17 @@ var h3d_mat_DepthBuffer = function(width,height) {
 	this.width = width;
 	this.height = height;
 	if(width >= 0) {
-		if(h3d_Engine.CURRENT == null) {
-			throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-		}
 		this.b = h3d_Engine.CURRENT.driver.allocDepthBuffer(this);
 	}
 };
 $hxClasses["h3d.mat.DepthBuffer"] = h3d_mat_DepthBuffer;
 h3d_mat_DepthBuffer.__name__ = ["h3d","mat","DepthBuffer"];
 h3d_mat_DepthBuffer.getDefault = function() {
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	return h3d_Engine.CURRENT.driver.getDefaultDepthBuffer();
 };
 h3d_mat_DepthBuffer.prototype = {
 	dispose: function() {
 		if(this.b != null) {
-			if(h3d_Engine.CURRENT == null) {
-				throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-			}
 			h3d_Engine.CURRENT.driver.disposeDepthBuffer(this);
 			this.b = null;
 		}
@@ -9463,9 +9326,6 @@ h3d_mat_Material.prototype = {
 	,clone: function(m) {
 		if(m == null) {
 			m = new h3d_mat_Material();
-		}
-		if((m == null ? null : js_Boot.getClass(m)) != js_Boot.getClass(this)) {
-			throw new js__$Boot_HaxeError(Std.string(this) + " is missing clone()");
 		}
 		m.passes.loadProps(this.passes);
 		m.set_castShadows(this.castShadows);
@@ -10144,9 +10004,6 @@ hxd_PixelFormat.ALPHA32F.toString = $estr;
 hxd_PixelFormat.ALPHA32F.__enum__ = hxd_PixelFormat;
 hxd_PixelFormat.__empty_constructs__ = [hxd_PixelFormat.ARGB,hxd_PixelFormat.BGRA,hxd_PixelFormat.RGBA,hxd_PixelFormat.RGBA16F,hxd_PixelFormat.RGBA32F,hxd_PixelFormat.ALPHA,hxd_PixelFormat.ALPHA16F,hxd_PixelFormat.ALPHA32F];
 var h3d_mat_Texture = function(w,h,flags,format,allocPos) {
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	var engine = h3d_Engine.CURRENT;
 	this.mem = engine.mem;
 	if(format == null) {
@@ -10181,7 +10038,6 @@ var h3d_mat_Texture = function(w,h,flags,format,allocPos) {
 	this.set_filter(h3d_mat_Filter.Linear);
 	this.set_wrap(h3d_mat_Wrap.Clamp);
 	this.bits &= 32767;
-	this.allocPos = allocPos;
 	if((this.flags & 1 << h3d_mat_TextureFlags.NoAlloc[1]) == 0) {
 		this.alloc();
 	}
@@ -10226,7 +10082,7 @@ h3d_mat_Texture.genNoise = function(size) {
 	if(t != null && !(t.t == null && t.realloc == null)) {
 		return t;
 	}
-	var t1 = new h3d_mat_Texture(size,size,[h3d_mat_TextureFlags.NoAlloc],null,{ fileName : "Texture.hx", lineNumber : 354, className : "h3d.mat.Texture", methodName : "genNoise"});
+	var t1 = new h3d_mat_Texture(size,size,[h3d_mat_TextureFlags.NoAlloc]);
 	var t2 = t1;
 	var a1 = size;
 	t1.realloc = function() {
@@ -10275,9 +10131,6 @@ h3d_mat_Texture.prototype = {
 		var str = this.name;
 		if(this.name == null) {
 			str = "Texture_" + this.id;
-			if(this.allocPos != null) {
-				str += "(" + this.allocPos.className + ":" + this.allocPos.lineNumber + ")";
-			}
 		}
 		return str + "(" + this.width + "x" + this.height + ")";
 	}
@@ -10379,7 +10232,6 @@ h3d_mat_Texture.prototype = {
 	,dispose: function() {
 		if(this.t != null) {
 			this.mem.deleteTexture(this);
-			this.allocPos.customParams = ["#DISPOSED"];
 		}
 	}
 	,swapTexture: function(t) {
@@ -10393,9 +10245,6 @@ h3d_mat_Texture.prototype = {
 	,capturePixels: function(withAlpha) {
 		if(withAlpha == null) {
 			withAlpha = false;
-		}
-		if(h3d_Engine.CURRENT == null) {
-			throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
 		}
 		var e = h3d_Engine.CURRENT;
 		e.pushTarget(this);
@@ -10449,9 +10298,6 @@ var h3d_pass_ScreenFx = function(shader) {
 	this.pass.set_culling(h3d_mat_Face.None);
 	this.pass.depth(false,h3d_mat_Compare.Always);
 	this.plan = h3d_prim_Plan2D.get();
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	this.engine = h3d_Engine.CURRENT;
 };
 $hxClasses["h3d.pass.ScreenFx"] = h3d_pass_ScreenFx;
@@ -10577,7 +10423,7 @@ h3d_pass_Blur.prototype = $extend(h3d_pass_ScreenFx.prototype,{
 		}
 		var alloc = tmp == null;
 		if(alloc) {
-			tmp = new h3d_mat_Texture(src.width,src.height,[h3d_mat_TextureFlags.Target],null,{ fileName : "Blur.hx", lineNumber : 93, className : "h3d.pass.Blur", methodName : "apply"});
+			tmp = new h3d_mat_Texture(src.width,src.height,[h3d_mat_TextureFlags.Target]);
 		}
 		if(this.values == null) {
 			this.calcValues();
@@ -10815,7 +10661,7 @@ h3d_pass_Default.prototype = $extend(h3d_pass_Base.prototype,{
 		return this.manager.globals;
 	}
 	,get_logEnable: function() {
-		return this.ctx.engine.driver.logEnable;
+		return false;
 	}
 	,getTexture: function(index) {
 		if(index == null) {
@@ -10898,9 +10744,6 @@ h3d_pass_Default.prototype = $extend(h3d_pass_Base.prototype,{
 	}
 	,log: function(str) {
 		var _this = this.ctx.engine.driver;
-		if(_this.logEnable) {
-			_this.logImpl(str);
-		}
 	}
 	,drawObject: function(p) {
 		this.ctx.drawPass = p;
@@ -11012,23 +10855,11 @@ h3d_pass_Default.prototype = $extend(h3d_pass_Base.prototype,{
 		var drawCalls = 0;
 		var shaderSwitches = 0;
 		if(this.ctx.engine.driver.logEnable) {
-			if(this.ctx.engine.driver.logEnable) {
-				var _this = this.ctx.engine.driver;
-				if(_this.logEnable) {
-					_this.logImpl("Pass " + (passes == null ? "???" : passes.pass.name) + " start");
-				}
-			}
 			drawTri = this.ctx.engine.drawTriangles;
 			drawCalls = this.ctx.engine.drawCalls;
 			shaderSwitches = this.ctx.engine.shaderSwitches;
 		}
 		while(p2 != null) {
-			if(this.ctx.engine.driver.logEnable) {
-				var _this1 = this.ctx.engine.driver;
-				if(_this1.logEnable) {
-					_this1.logImpl("Render " + Std.string(p2.obj) + "." + p2.pass.name);
-				}
-			}
 			var v = p2.obj.absPos;
 			this.manager.globals.map.set(this.globalModelView_id,v);
 			if(p2.shader.globals.exists(this.globalModelViewInverse_id)) {
@@ -11056,19 +10887,9 @@ h3d_pass_Default.prototype = $extend(h3d_pass_Base.prototype,{
 			this.drawObject(p2);
 			p2 = p2.next;
 		}
-		if(this.ctx.engine.driver.logEnable) {
-			var _this2 = this.ctx.engine.driver;
-			if(_this2.logEnable) {
-				_this2.logImpl("Pass " + (passes == null ? "???" : passes.pass.name) + " end");
-			}
-			var _this3 = this.ctx.engine.driver;
-			if(_this3.logEnable) {
-				_this3.logImpl("\t" + (this.ctx.engine.drawTriangles - drawTri) + " tri " + (this.ctx.engine.drawCalls - drawCalls) + " calls " + (this.ctx.engine.shaderSwitches - shaderSwitches) + " shaders");
-			}
-		}
-		var _this4 = this.ctx;
-		_this4.cachedPos = 0;
-		_this4.drawPass = null;
+		var _this = this.ctx;
+		_this.cachedPos = 0;
+		_this.drawPass = null;
 		return passes;
 	}
 	,get_cameraView: function() {
@@ -11286,7 +11107,7 @@ var h3d_pass_HardwarePick = function() {
 	_this.set_blendAlphaSrc(src);
 	_this.set_blendDst(dst);
 	_this.set_blendAlphaDst(dst);
-	this.texOut = new h3d_mat_Texture(3,3,[h3d_mat_TextureFlags.Target],null,{ fileName : "HardwarePick.hx", lineNumber : 38, className : "h3d.pass.HardwarePick", methodName : "new"});
+	this.texOut = new h3d_mat_Texture(3,3,[h3d_mat_TextureFlags.Target]);
 	this.texOut.depthBuffer = new h3d_mat_DepthBuffer(3,3);
 };
 $hxClasses["h3d.pass.HardwarePick"] = h3d_pass_HardwarePick;
@@ -11652,9 +11473,6 @@ var h3d_pass_ShadowMap = function(size) {
 	this.color = new h3d_Vector();
 	this.blur = new h3d_pass_Blur(2,3);
 	this.border = new h3d_pass_Border(size,size);
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	this.customDepth = h3d_Engine.CURRENT.driver.hasFeature(h3d_impl_Feature.AllocDepthBuffer);
 	if(!this.customDepth) {
 		this.depth = h3d_mat_DepthBuffer.getDefault();
@@ -12102,7 +11920,6 @@ var h3d_prim_BigPrimitive = function(stride,isRaw,pos) {
 	if(stride < 3) {
 		throw new js__$Boot_HaxeError("Minimum stride = 3");
 	}
-	this.allocPos = pos;
 };
 $hxClasses["h3d.prim.BigPrimitive"] = h3d_prim_BigPrimitive;
 h3d_prim_BigPrimitive.__name__ = ["h3d","prim","BigPrimitive"];
@@ -12224,7 +12041,7 @@ h3d_prim_BigPrimitive.prototype = $extend(h3d_prim_Primitive.prototype,{
 		if(this.tmpBuf != null) {
 			if(this.bufPos > 0 && this.idxPos > 0) {
 				this.flushing = true;
-				var b = h3d_Buffer.ofSubFloats(this.tmpBuf,this.stride,this.bufPos / this.stride | 0,null,this.allocPos);
+				var b = h3d_Buffer.ofSubFloats(this.tmpBuf,this.stride,this.bufPos / this.stride | 0);
 				if(this.isRaw) {
 					b.flags |= 1 << h3d_BufferFlag.RawFormat[1];
 				}
@@ -12512,7 +12329,7 @@ h3d_prim_Plan2D.prototype = $extend(h3d_prim_Primitive.prototype,{
 		v.push(1);
 		v.push(1);
 		v.push(0);
-		this.buffer = h3d_Buffer.ofFloats(v,4,[h3d_BufferFlag.Quads,h3d_BufferFlag.RawFormat],{ fileName : "Plan2D.hx", lineNumber : 38, className : "h3d.prim.Plan2D", methodName : "alloc"});
+		this.buffer = h3d_Buffer.ofFloats(v,4,[h3d_BufferFlag.Quads,h3d_BufferFlag.RawFormat]);
 	}
 	,render: function(engine) {
 		if(this.buffer == null || this.buffer.isDisposed()) {
@@ -12551,7 +12368,7 @@ h3d_prim_RawPrimitive.prototype = $extend(h3d_prim_Primitive.prototype,{
 		if(inf.stride < 8) {
 			flags.push(h3d_BufferFlag.RawFormat);
 		}
-		this.buffer = h3d_Buffer.ofFloats(inf.vbuf,inf.stride,flags,{ fileName : "RawPrimitive.hx", lineNumber : 23, className : "h3d.prim.RawPrimitive", methodName : "alloc"});
+		this.buffer = h3d_Buffer.ofFloats(inf.vbuf,inf.stride,flags);
 		this.vcount = this.buffer.vertices;
 		this.tcount = inf.ibuf != null ? inf.ibuf.length / 3 | 0 : inf.quads ? this.vcount >> 1 : this.vcount / 3 | 0;
 		if(inf.ibuf != null) {
@@ -12925,9 +12742,6 @@ h3d_scene_Object.prototype = {
 	,clone: function(o) {
 		if(o == null) {
 			o = new h3d_scene_Object();
-		}
-		if((o == null ? null : js_Boot.getClass(o)) != js_Boot.getClass(this)) {
-			throw new js__$Boot_HaxeError(Std.string(this) + " is missing clone()");
 		}
 		var v = this.x;
 		o.x = v;
@@ -13657,7 +13471,7 @@ var h3d_scene_Graphics = function(parent) {
 	this.curZ = 0.;
 	this.curY = 0.;
 	this.curX = 0.;
-	this.bprim = new h3d_prim_BigPrimitive(12,null,{ fileName : "Graphics.hx", lineNumber : 43, className : "h3d.scene.Graphics", methodName : "new"});
+	this.bprim = new h3d_prim_BigPrimitive(12);
 	h3d_scene_Mesh.call(this,this.bprim,null,parent);
 	this.tmpPoints = [];
 	this.lineShader = new h3d_shader_LineShader();
@@ -14801,9 +14615,6 @@ var h3d_scene_Scene = function() {
 	this.hitInteractives = [];
 	this.interactives = [];
 	this.camera = new h3d_Camera();
-	if(h3d_Engine.CURRENT == null) {
-		throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-	}
 	var engine = h3d_Engine.CURRENT;
 	if(engine != null) {
 		this.camera.screenRatio = engine.width / engine.height;
@@ -15074,9 +14885,6 @@ h3d_scene_Scene.prototype = $extend(h3d_scene_Object.prototype,{
 	}
 	,hardwarePick: function(pixelX,pixelY) {
 		var _gthis = this;
-		if(h3d_Engine.CURRENT == null) {
-			throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-		}
 		var engine = h3d_Engine.CURRENT;
 		this.camera.screenRatio = engine.width / engine.height;
 		this.camera.update();
@@ -15152,7 +14960,7 @@ h3d_scene_Scene.prototype = $extend(h3d_scene_Object.prototype,{
 				this.hardwarePass = p;
 			}
 			var _this = this.ctx;
-			var value = h3d_mat_Texture.fromColor(267386880,0,{ fileName : "Scene.hx", lineNumber : 239, className : "h3d.scene.Scene", methodName : "hardwarePick"});
+			var value = h3d_mat_Texture.fromColor(267386880,0);
 			_this.setGlobalID(hxsl_Globals.allocID("depthMap"),value);
 			p.pickX = pixelX;
 			p.pickY = pixelY;
@@ -15174,9 +14982,6 @@ h3d_scene_Scene.prototype = $extend(h3d_scene_Object.prototype,{
 		return found;
 	}
 	,syncOnly: function(et) {
-		if(h3d_Engine.CURRENT == null) {
-			throw new js__$Boot_HaxeError("no current context, please do this operation after engine init/creation");
-		}
 		var engine = h3d_Engine.CURRENT;
 		this.setElapsedTime(et);
 		var t = engine.getCurrentTarget();
@@ -15294,19 +15099,6 @@ h3d_scene_Scene.prototype = $extend(h3d_scene_Object.prototype,{
 		this.ctx.lightSystem = this.lightSystem;
 		this.lightSystem.initLights(this.ctx);
 		this.renderer.process(passes);
-		var _g2 = 0;
-		while(_g2 < passes.length) {
-			var p2 = passes[_g2];
-			++_g2;
-			if(!p2.rendered) {
-				haxe_Log.trace("Pass " + p2.name + " has not been rendered : don't know how to handle.",{ fileName : "Scene.hx", lineNumber : 331, className : "h3d.scene.Scene", methodName : "render"});
-				var o = p2.passes;
-				while(o != null) {
-					haxe_Log.trace(" used by " + o.obj.name == null ? "" + Std.string(o.obj) : o.obj.name,{ fileName : "Scene.hx", lineNumber : 334, className : "h3d.scene.Scene", methodName : "render"});
-					o = o.next;
-				}
-			}
-		}
 		this.ctx.done();
 		this.ctx.scene = null;
 		this.ctx.camera = null;
@@ -16495,7 +16287,7 @@ h3d_shader_Manager.prototype = {
 			}
 			var t1 = t;
 			if(t1 == null) {
-				t1 = h3d_mat_Texture.fromColor(16711935,null,{ fileName : "Manager.hx", lineNumber : 183, className : "h3d.shader.Manager", methodName : "fillParams"});
+				t1 = h3d_mat_Texture.fromColor(16711935);
 			}
 			buf1.tex[tid++] = t1;
 			p1 = p1.next;
@@ -16521,7 +16313,7 @@ h3d_shader_Manager.prototype = {
 			}
 			var t3 = t2;
 			if(t3 == null) {
-				t3 = h3d_mat_Texture.fromColor(16711935,null,{ fileName : "Manager.hx", lineNumber : 190, className : "h3d.shader.Manager", methodName : "fillParams"});
+				t3 = h3d_mat_Texture.fromColor(16711935);
 			}
 			buf1.tex[tid++] = t3;
 			p2 = p2.next;
@@ -16573,7 +16365,7 @@ h3d_shader_Manager.prototype = {
 			}
 			var t5 = t4;
 			if(t5 == null) {
-				t5 = h3d_mat_Texture.fromColor(16711935,null,{ fileName : "Manager.hx", lineNumber : 183, className : "h3d.shader.Manager", methodName : "fillParams"});
+				t5 = h3d_mat_Texture.fromColor(16711935);
 			}
 			buf2.tex[tid1++] = t5;
 			p4 = p4.next;
@@ -16599,7 +16391,7 @@ h3d_shader_Manager.prototype = {
 			}
 			var t7 = t6;
 			if(t7 == null) {
-				t7 = h3d_mat_Texture.fromColor(16711935,null,{ fileName : "Manager.hx", lineNumber : 190, className : "h3d.shader.Manager", methodName : "fillParams"});
+				t7 = h3d_mat_Texture.fromColor(16711935);
 			}
 			buf2.tex[tid1++] = t7;
 			p5 = p5.next;
@@ -19205,7 +18997,7 @@ var hxd_BitmapData = function(width,height) {
 		var canvas = window.document.createElement("canvas");
 		canvas.width = width;
 		canvas.height = height;
-		this.ctx = canvas.getContext("2d", {antialias: false});
+		this.ctx = canvas.getContext("2d",null);
 	}
 };
 $hxClasses["hxd.BitmapData"] = hxd_BitmapData;
@@ -19280,7 +19072,7 @@ hxd_BitmapData.prototype = {
 		var canvas = window.document.createElement("canvas");
 		canvas.width = w;
 		canvas.height = h;
-		var ctx = canvas.getContext("2d", {antialias: false});
+		var ctx = canvas.getContext("2d",null);
 		ctx.drawImage(this.ctx.canvas,x,y);
 		return hxd_BitmapData.fromNative(ctx);
 	}
@@ -22510,61 +22302,41 @@ hxsl_Cache.prototype = {
 		haxe_ds_ArraySort.sort(shaderDatas,function(s11,s2) {
 			return s2.p - s11.p;
 		});
-		var _g = 0;
-		while(_g < shaderDatas.length) {
-			var s3 = shaderDatas[_g];
-			++_g;
-			hxsl_Printer.check(s3.inst.shader);
-		}
 		var linker = new hxsl_Linker();
-		var _g1 = [];
-		var _g11 = 0;
-		while(_g11 < shaderDatas.length) {
-			var s4 = shaderDatas[_g11];
-			++_g11;
-			_g1.push(s4.inst.shader);
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < shaderDatas.length) {
+			var s3 = shaderDatas[_g1];
+			++_g1;
+			_g.push(s3.inst.shader);
 		}
-		var s5 = linker.link(_g1,this.outVars[outVars]);
-		var _g12 = [];
-		var _g2 = 0;
-		while(_g2 < shaderDatas.length) {
-			var s6 = shaderDatas[_g2];
-			++_g2;
-			_g12.push(s6.inst.shader);
-		}
-		hxsl_Printer.check(s5,_g12);
+		var s4 = linker.link(_g,this.outVars[outVars]);
 		var paramVars = new haxe_ds_IntMap();
-		var _g21 = 0;
-		var _g3 = linker.allVars;
-		while(_g21 < _g3.length) {
-			var v = _g3[_g21];
-			++_g21;
+		var _g11 = 0;
+		var _g2 = linker.allVars;
+		while(_g11 < _g2.length) {
+			var v = _g2[_g11];
+			++_g11;
 			if(v.v.kind == hxsl_VarKind.Param) {
-				var _g4 = v.v.type;
-				if(_g4[1] == 12) {
+				var _g3 = v.v.type;
+				if(_g3[1] == 12) {
 					continue;
 				}
 				var inf = shaderDatas[v.instanceIndex];
 				paramVars.h[v.id] = { instance : inf.index, index : inf.inst.params.h[v.merged[0].id]};
 			}
 		}
-		var prev = s5;
-		var s7 = new hxsl_Splitter().split(s5);
-		hxsl_Printer.check(s7.vertex,[prev]);
-		hxsl_Printer.check(s7.fragment,[prev]);
-		var prev1 = s7;
-		var s8 = new hxsl_Dce().dce(s7.vertex,s7.fragment);
-		hxsl_Printer.check(s8.vertex,[prev1.vertex]);
-		hxsl_Printer.check(s8.fragment,[prev1.fragment]);
+		var prev = s4;
+		var s5 = new hxsl_Splitter().split(s4);
+		var prev1 = s5;
+		var s6 = new hxsl_Dce().dce(s5.vertex,s5.fragment);
 		var r = new hxsl_RuntimeShader();
-		r.vertex = this.flattenShader(s8.vertex,hxsl_FunctionKind.Vertex,paramVars);
+		r.vertex = this.flattenShader(s6.vertex,hxsl_FunctionKind.Vertex,paramVars);
 		r.vertex.vertex = true;
-		r.fragment = this.flattenShader(s8.fragment,hxsl_FunctionKind.Fragment,paramVars);
+		r.fragment = this.flattenShader(s6.fragment,hxsl_FunctionKind.Fragment,paramVars);
 		r.globals = new haxe_ds_IntMap();
 		this.initGlobals(r,r.vertex);
 		this.initGlobals(r,r.fragment);
-		hxsl_Printer.check(r.vertex.data,[s8.vertex]);
-		hxsl_Printer.check(r.fragment.data,[s8.fragment]);
 		r.signature = haxe_crypto_Md5.encode(hxsl_Printer.shaderToString(r.vertex.data) + hxsl_Printer.shaderToString(r.fragment.data));
 		var key = r.signature;
 		var _this = this.byID;
@@ -28980,7 +28752,6 @@ hxsl_SharedShader.prototype = {
 		$eval.inlineCalls = true;
 		$eval.unrollLoops = true;
 		var i = new hxsl_ShaderInstance($eval["eval"](this.data));
-		hxsl_Printer.check(i.shader,[this.data]);
 		this.paramsCount = 0;
 		var _g1 = 0;
 		var _g11 = this.data.vars;
@@ -30038,5 +29809,3 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-//# sourceMappingURL=content.js.map
