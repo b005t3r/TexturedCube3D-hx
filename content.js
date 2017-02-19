@@ -7545,7 +7545,7 @@ var h3d_impl_GlDriver = function() {
 	if(this.canvas == null) {
 		throw new js__$Boot_HaxeError("Canvas #webgl not found");
 	}
-	this.gl = js_html__$CanvasElement_CanvasUtil.getContextWebGL(this.canvas,{ alpha : false});
+	this.gl = js_html__$CanvasElement_CanvasUtil.getContextWebGL(this.canvas,{ alpha : false, antialias: false});
 	if(this.gl == null) {
 		throw new js__$Boot_HaxeError("Could not acquire GL context");
 	}
@@ -19205,7 +19205,7 @@ var hxd_BitmapData = function(width,height) {
 		var canvas = window.document.createElement("canvas");
 		canvas.width = width;
 		canvas.height = height;
-		this.ctx = canvas.getContext("2d",null);
+		this.ctx = canvas.getContext("2d", {antialias: false});
 	}
 };
 $hxClasses["hxd.BitmapData"] = hxd_BitmapData;
@@ -19280,7 +19280,7 @@ hxd_BitmapData.prototype = {
 		var canvas = window.document.createElement("canvas");
 		canvas.width = w;
 		canvas.height = h;
-		var ctx = canvas.getContext("2d",null);
+		var ctx = canvas.getContext("2d", {antialias: false});
 		ctx.drawImage(this.ctx.canvas,x,y);
 		return hxd_BitmapData.fromNative(ctx);
 	}
