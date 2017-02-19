@@ -1,0 +1,12 @@
+# required libs, heaps is needed for hxsl
+-lib heaps
+
+# main class to run
+-cp src
+-main Main
+
+# debugging settings
+-debug
+
+# output file
+-js out/content.js

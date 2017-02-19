@@ -1,0 +1,25 @@
+# required libs, heaps is needed for hxsl
+-lib heaps
+-lib air3
+
+# main class to run
+-cp src
+-main Main
+
+# debugging settings, -D fdb is required for having trace() output in the console
+-debug
+-D fdb
+
+# AS3/AIR specific settings, make sure swf-version is equal or lower to the one set in the appDescriptor.xml
+--flash-strict
+-swf-header 800:600:60:333333
+-swf-version 22
+
+# create the script that we'll use for running the project
+# first output the ADL path - this needs to be edited depeneding on where Flex+AIR SDK is installed
+-cmd mkdir -p out
+-cmd echo "/Users/booster/Documents/Flex/flexsdk4.15.0air23/bin/adl `pwd`/appDescriptor.xml" > out/run_swf
+-cmd chmod +x out/run_swf
+
+# output file
+-swf out/content.swf
