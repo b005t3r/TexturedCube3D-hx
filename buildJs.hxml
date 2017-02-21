@@ -6,7 +6,7 @@
 -main Main
 
 # debugging settings
--debug
+#-debug
 
 # output file
 -js out/content.js

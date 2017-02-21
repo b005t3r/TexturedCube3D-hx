@@ -212,7 +212,7 @@ class Main {
 
     private function onNextFrame() {
         if(haxeLogoTexture == null)
-                return;
+            return;
 
         // update timer
         Timer.update();
