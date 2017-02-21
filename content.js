@@ -8206,6 +8206,7 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 		this.gl.drawElements(4,ntriangles * 3,5123,startIndex * 2);
 	}
 	,present: function() {
+		this.gl.finish();
 	}
 	,isDisposed: function() {
 		return this.gl.isContextLost();
