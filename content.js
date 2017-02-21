@@ -2370,7 +2370,7 @@ var h3d_Engine = function(hardware,aa) {
 	this.realFps = hxd_System.getDefaultFrameRate();
 	this.lastTime = new Date().getTime() / 1000;
 	stage.addResizeEvent($bind(this,this.onStageResize));
-	this.driver = new h3d_impl_GlDriver();
+	this.driver = new h3d_impl_GlDriver(this.antiAlias);
 	h3d_Engine.CURRENT = this;
 };
 $hxClasses["h3d.Engine"] = h3d_Engine;
@@ -2681,11 +2681,10 @@ h3d_Engine.prototype = {
 	,clear: function(color,depth,stencil) {
 		if(color != null) {
 			var _this = this.tmpVector;
-			var s = 0.00392156862745098;
-			_this.x = (color >> 16 & 255) * s;
-			_this.y = (color >> 8 & 255) * s;
-			_this.z = (color & 255) * s;
-			_this.w = (color >>> 24) * s;
+			_this.x = (color >> 16 & 255) / 255;
+			_this.y = (color >> 8 & 255) / 255;
+			_this.z = (color & 255) / 255;
+			_this.w = (color >>> 24) / 255;
 		}
 		if(this.needFlushTarget) {
 			this.doFlushTarget();
@@ -4340,15 +4339,11 @@ h3d_Vector.prototype = {
 	,set_a: function(v) {
 		return this.w = v;
 	}
-	,setColor: function(c,scale) {
-		if(scale == null) {
-			scale = 1.0;
-		}
-		var s = scale / 255;
-		this.x = (c >> 16 & 255) * s;
-		this.y = (c >> 8 & 255) * s;
-		this.z = (c & 255) * s;
-		this.w = (c >>> 24) * s;
+	,setColor: function(c) {
+		this.x = (c >> 16 & 255) / 255;
+		this.y = (c >> 8 & 255) / 255;
+		this.z = (c & 255) / 255;
+		this.w = (c >>> 24) / 255;
 	}
 	,makeColor: function(hue,saturation,brightness) {
 		if(brightness == null) {
@@ -7520,13 +7515,17 @@ h3d_impl__$GlDriver_CompiledProgram.__name__ = ["h3d","impl","_GlDriver","Compil
 h3d_impl__$GlDriver_CompiledProgram.prototype = {
 	__class__: h3d_impl__$GlDriver_CompiledProgram
 };
-var h3d_impl_GlDriver = function() {
+var h3d_impl_GlDriver = function(antiAlias) {
+	if(antiAlias == null) {
+		antiAlias = 0;
+	}
+	this.firstShader = true;
 	this.boundTextures = [];
 	this.canvas = hxd_Stage.getCanvas();
 	if(this.canvas == null) {
 		throw new js__$Boot_HaxeError("Canvas #webgl not found");
 	}
-	this.gl = js_html__$CanvasElement_CanvasUtil.getContextWebGL(this.canvas,{ alpha : false});
+	this.gl = js_html__$CanvasElement_CanvasUtil.getContextWebGL(this.canvas,{ alpha : false, antialias : antiAlias > 0});
 	if(this.gl == null) {
 		throw new js__$Boot_HaxeError("Could not acquire GL context");
 	}
@@ -7572,9 +7571,6 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 		this.gl.shaderSource(s,code);
 		this.gl.compileShader(s);
 		var log = this.gl.getShaderInfoLog(s);
-		if(log != "") {
-			haxe_Log.trace(log,{ fileName : "GlDriver.hx", lineNumber : 185, className : "h3d.impl.GlDriver", methodName : "compileShader"});
-		}
 		if(this.gl.getShaderParameter(s,35713) != 1) {
 			var log1 = this.gl.getShaderInfoLog(s);
 			var lid = Std.parseInt(HxOverrides.substr(log1,9,null));
@@ -7621,7 +7617,11 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 		if(p == null) {
 			p = new h3d_impl__$GlDriver_CompiledProgram();
 			var glout = new hxsl_GlslOut();
-			glout.glES = true;
+			if(this.shaderVersion != null) {
+				glout.version = this.shaderVersion;
+			} else {
+				glout.glES = true;
+			}
 			p.vertex = this.compileShader(glout,shader.vertex);
 			p.fragment = this.compileShader(glout,shader.fragment);
 			p.p = this.gl.createProgram();
@@ -7632,8 +7632,10 @@ h3d_impl_GlDriver.prototype = $extend(h3d_impl_Driver.prototype,{
 			this.gl.deleteShader(p.fragment.s);
 			if(this.gl.getProgramParameter(p.p,35714) != 1) {
 				var log = this.gl.getProgramInfoLog(p.p);
+				this.gl.deleteProgram(p.p);
 				throw new js__$Boot_HaxeError("Program linkage failure: " + log + "\nVertex=\n" + glout.run(shader.vertex.data) + "\n\nFragment=\n" + glout.run(shader.fragment.data));
 			}
+			this.firstShader = false;
 			this.initShader(p,p.vertex,shader.vertex);
 			this.initShader(p,p.fragment,shader.fragment);
 			p.attribNames = [];
@@ -11126,20 +11128,18 @@ h3d_pass_HardwarePick.prototype = $extend(h3d_pass_Default.prototype,{
 		h3d_pass_Default.prototype.drawObject.call(this,p);
 		var _this = this.fixedColor.colorID__;
 		var c = -16777216 | ++this.colorID;
-		var s = 0.00392156862745098;
-		_this.x = (c >> 16 & 255) * s;
-		_this.y = (c >> 8 & 255) * s;
-		_this.z = (c & 255) * s;
-		_this.w = (c >>> 24) * s;
+		_this.x = (c >> 16 & 255) / 255;
+		_this.y = (c >> 8 & 255) / 255;
+		_this.z = (c & 255) / 255;
+		_this.w = (c >>> 24) / 255;
 	}
 	,nextID: function() {
 		var _this = this.fixedColor.colorID__;
 		var c = -16777216 | ++this.colorID;
-		var s = 0.00392156862745098;
-		_this.x = (c >> 16 & 255) * s;
-		_this.y = (c >> 8 & 255) * s;
-		_this.z = (c & 255) * s;
-		_this.w = (c >>> 24) * s;
+		_this.x = (c >> 16 & 255) / 255;
+		_this.y = (c >> 8 & 255) / 255;
+		_this.z = (c & 255) / 255;
+		_this.w = (c >>> 24) / 255;
 	}
 	,draw: function(passes) {
 		var cur = passes;
@@ -11152,11 +11152,10 @@ h3d_pass_HardwarePick.prototype = $extend(h3d_pass_Default.prototype,{
 		this.colorID = 0;
 		var _this = this.fixedColor.colorID__;
 		var c = -16777216 | ++this.colorID;
-		var s = 0.00392156862745098;
-		_this.x = (c >> 16 & 255) * s;
-		_this.y = (c >> 8 & 255) * s;
-		_this.z = (c & 255) * s;
-		_this.w = (c >>> 24) * s;
+		_this.x = (c >> 16 & 255) / 255;
+		_this.y = (c >> 8 & 255) / 255;
+		_this.z = (c & 255) / 255;
+		_this.w = (c >>> 24) / 255;
 		var _this1 = this.fixedColor.viewport__;
 		_this1.x = -(this.pickX * 2 / this.ctx.engine.width - 1);
 		_this1.y = this.pickY * 2 / this.ctx.engine.height - 1;
@@ -11942,8 +11941,12 @@ h3d_prim_BigPrimitive.prototype = $extend(h3d_prim_Primitive.prototype,{
 				h3d_prim_BigPrimitive.PREV_BUFFER = null;
 			}
 			var this2 = this.tmpBuf;
-			var v = 65535 * this.stride;
-			while(v < this2.length) this2.push(0.);
+			var _g1 = this2.length;
+			var _g = 65535 * this.stride;
+			while(_g1 < _g) {
+				var i = _g1++;
+				this2.push(0.);
+			}
 		}
 		if(this.tmpIdx == null) {
 			this.tmpIdx = h3d_prim_BigPrimitive.PREV_INDEX;
@@ -19263,13 +19266,23 @@ hxd__$FloatBuffer_FloatBuffer_$Impl_$.push = function(this1,v) {
 	this1.push(v);
 };
 hxd__$FloatBuffer_FloatBuffer_$Impl_$.grow = function(this1,v) {
-	while(v < this1.length) this1.push(0.);
+	var _g1 = this1.length;
+	var _g = v;
+	while(_g1 < _g) {
+		var i = _g1++;
+		this1.push(0.);
+	}
 };
 hxd__$FloatBuffer_FloatBuffer_$Impl_$.resize = function(this1,v) {
 	if(this1.length > v) {
 		this1.splice(v,this1.length - v);
 	} else {
-		while(v < this1.length) this1.push(0.);
+		var _g1 = this1.length;
+		var _g = v;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this1.push(0.);
+		}
 	}
 };
 hxd__$FloatBuffer_FloatBuffer_$Impl_$.arrayRead = function(this1,key) {
